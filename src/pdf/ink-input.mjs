@@ -6,11 +6,16 @@ export function getInkSamples(event) {
 }
 
 export function matchesInkPointer(action, event) {
-	return action.pointerId === undefined || action.pointerId === event.pointerId;
+	return (action.pointerId === undefined || action.pointerId === event.pointerId)
+		&& !(Number.isFinite(action.startTime) && Number.isFinite(event.timeStamp)
+			&& event.timeStamp < action.startTime);
 }
 
-export function appendInkSamples(path, event, toPoint) {
+export function appendInkSamples(path, event, toPoint, startTime = -Infinity) {
 	for (let sample of getInkSamples(event)) {
+		if (Number.isFinite(sample.timeStamp) && sample.timeStamp < startTime) {
+			continue;
+		}
 		let point = toPoint(sample);
 		if (!point || !point.every(Number.isFinite)) {
 			continue;

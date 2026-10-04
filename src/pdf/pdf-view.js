@@ -2697,8 +2697,23 @@ class PDFView {
 	}
 
 	_handlePointerDown(event) {
-		if (this.action?.type === 'ink') {
+		// Ink does not use click counts. Start it from PointerEvents, including
+		// mouse-mode tablets, rather than compatibility mousedown coordinates.
+		if (this._tool.type === 'ink' && event.type === 'mousedown'
+				&& this._iframeWindow.PointerEvent) {
 			return;
+		}
+		if (this.action?.type === 'ink') {
+			if (event.type === 'pointerdown' && event.button === 0
+					&& event.pointerId === this.action.pointerId
+					&& event.timeStamp > this.action.startTime) {
+				// A fresh contact from the same pointer starts a separate stroke,
+				// even if the previous release did not reach this window.
+				this._handlePointerUp(this.action.lastEvent);
+			}
+			else {
+				return;
+			}
 		}
 		if (this._nativeTextSelection?.handlePointerDown(event)) {
 			return;
@@ -2710,7 +2725,7 @@ class PDFView {
 			this._creationTimeout = null;
 		}
 
-		if (event.pointerType === 'mouse') {
+		if (event.pointerType === 'mouse' && this._tool.type !== 'ink') {
 			return;
 		}
 		if (this._pointerDownTriggered) {
@@ -2839,6 +2854,7 @@ class PDFView {
 			let point = position.rects[0].slice(0, 2);
 			action.lastEvent = event;
 			action.pointerId = event.pointerId;
+			action.startTime = event.timeStamp;
 			action.smoothing = this._tool.smoothing !== false;
 			if (this._tool.pressure && event.pointerType === 'pen') {
 				action.pressureInk = new PressureInk(point, event);
@@ -2983,7 +2999,7 @@ class PDFView {
 			);
 			this.action.pressureInk?.add(point, sample);
 			return point;
-		});
+		}, this.action.startTime);
 	}
 
 	_getInkActionAnnotations(action, finish = false) {
