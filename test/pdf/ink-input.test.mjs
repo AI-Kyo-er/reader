@@ -74,7 +74,7 @@ test('collects all samples while painting at most once per frame', () => {
 	let callbacks = new Map();
 	let paints = [];
 	let nextId = 0;
-	let frame = new InkFrame(callback => {
+	let frame = new InkFrame((callback) => {
 		callbacks.set(++nextId, callback);
 		return nextId;
 	}, id => callbacks.delete(id), pages => paints.push(pages));

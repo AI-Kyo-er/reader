@@ -2998,6 +2998,10 @@ class PDFView {
 	}
 
 	_handleOtherPointerMove = throttle((event) => {
+		// A queued hover event can run after a new pen stroke has started.
+		if (this.action?.type === 'ink') {
+			return;
+		}
 		if (this._nativeTextSelection?.shouldDeferEvent(event)) {
 			return;
 		}
@@ -3337,11 +3341,6 @@ class PDFView {
 				}
 			};
 			action.triggered = true;
-		}
-		else if (action.type === 'ink') {
-			let point = originalPagePosition.rects[0].slice(0, 2);
-			action.annotation.position.paths[0].push(...point);
-			// Already triggered on pointerdown
 		}
 		else if (action.type === 'erase') {
 			let annotations = [];
