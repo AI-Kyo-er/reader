@@ -66,25 +66,6 @@ test('smoothing preserves the endpoint of a sub-point stroke', () => {
 	assert.ok(path.length >= 4);
 });
 
-test('ignores delayed events from the previous contact with a reused pointer ID', () => {
-	let action = { pointerId: 7, startTime: 20 };
-	assert.equal(matchesInkPointer(action, { pointerId: 7, timeStamp: 19 }), false);
-	assert.equal(matchesInkPointer(action, { pointerId: 7, timeStamp: 20 }), true);
-	assert.equal(matchesInkPointer(action, { pointerId: 7, timeStamp: 21 }), true);
-});
-
-test('does not import pre-contact samples into a new stroke', () => {
-	let path = [100, 200];
-	appendInkSamples(path, {
-		clientX: 102, clientY: 202, timeStamp: 22,
-		getCoalescedEvents: () => [
-			{ clientX: 1, clientY: 2, timeStamp: 19 },
-			{ clientX: 101, clientY: 201, timeStamp: 21 },
-		],
-	}, toPoint, 20);
-	assert.deepEqual(path, [100, 200, 101, 201, 102, 202]);
-});
-
 test('smoothing preserves the endpoint of a normal stroke', () => {
 	assert.deepEqual(smoothPath([0, 0, 10, 0, 10.1, 0.1]).slice(-2), [10.1, 0.1]);
 });

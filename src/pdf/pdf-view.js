@@ -2696,23 +2696,8 @@ class PDFView {
 	}
 
 	_handlePointerDown(event) {
-		// Ink does not use click counts. Start it from PointerEvents, including
-		// mouse-mode tablets, rather than compatibility mousedown coordinates.
-		if (this._tool.type === 'ink' && event.type === 'mousedown'
-				&& this._iframeWindow.PointerEvent) {
-			return;
-		}
 		if (this.action?.type === 'ink') {
-			if (event.type === 'pointerdown' && event.button === 0
-					&& event.pointerId === this.action.pointerId
-					&& event.timeStamp > this.action.startTime) {
-				// A fresh contact from the same pointer starts a separate stroke,
-				// even if the previous release did not reach this window.
-				this._handlePointerUp(this.action.lastEvent);
-			}
-			else {
-				return;
-			}
+			return;
 		}
 		if (this._nativeTextSelection?.handlePointerDown(event)) {
 			return;
@@ -2724,7 +2709,7 @@ class PDFView {
 			this._creationTimeout = null;
 		}
 
-		if (event.pointerType === 'mouse' && this._tool.type !== 'ink') {
+		if (event.pointerType === 'mouse') {
 			return;
 		}
 		if (this._pointerDownTriggered) {
@@ -2853,7 +2838,6 @@ class PDFView {
 			let point = position.rects[0].slice(0, 2);
 			action.lastEvent = event;
 			action.pointerId = event.pointerId;
-			action.startTime = event.timeStamp;
 			action.smoothing = this._tool.smoothing !== false;
 			if (event.pointerId !== undefined) {
 				let target = event.target.closest('#viewerContainer');
@@ -2993,7 +2977,7 @@ class PDFView {
 				sample.clientX + page.div.scrollLeft - rect.left,
 				sample.clientY + page.div.scrollTop - rect.top
 			);
-		}, this.action.startTime);
+		});
 	}
 
 	_handleInkPointerLost(event) {
