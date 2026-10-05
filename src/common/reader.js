@@ -190,7 +190,7 @@ class Reader {
 			ink: {
 				type: 'ink',
 				color: ANNOTATION_COLORS[3][1],
-				size: 2,
+				size: Number.isFinite(options.inkSize) && options.inkSize > 0 ? options.inkSize : 2,
 				smoothing: options.inkSmoothing !== false,
 				pressure: !!options.inkPressure
 			},
