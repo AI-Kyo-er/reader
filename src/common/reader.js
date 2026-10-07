@@ -105,6 +105,8 @@ class Reader {
 		this._onToggleSidebar = options.onToggleSidebar;
 		this._onChangeSidebarWidth = options.onChangeSidebarWidth;
 		this._onChangeSidebarView = options.onChangeSidebarView;
+		this._onChangeInkColor = options.onChangeInkColor;
+		this._onChangeInkSize = options.onChangeInkSize;
 		this._onChangeInkSmoothing = options.onChangeInkSmoothing;
 		this._onChangeInkPressure = options.onChangeInkPressure;
 		this._onChangeViewState = options.onChangeViewState;
@@ -189,7 +191,7 @@ class Reader {
 			},
 			ink: {
 				type: 'ink',
-				color: ANNOTATION_COLORS[3][1],
+				color: /^#[0-9a-f]{6}$/i.test(options.inkColor) ? options.inkColor : ANNOTATION_COLORS[3][1],
 				size: Number.isFinite(options.inkSize) && options.inkSize > 0 ? options.inkSize : 2,
 				smoothing: options.inkSmoothing !== false,
 				pressure: !!options.inkPressure
@@ -892,6 +894,12 @@ class Reader {
 			tool[key] = params[key];
 		}
 		this._updateState({ tool });
+		if (tool.type === 'ink' && params.color !== undefined) {
+			this._onChangeInkColor?.(tool.color);
+		}
+		if (tool.type === 'ink' && params.size !== undefined) {
+			this._onChangeInkSize?.(tool.size);
+		}
 		if (tool.type === 'ink' && params.smoothing !== undefined) {
 			this._onChangeInkSmoothing?.(tool.smoothing);
 		}
@@ -924,6 +932,26 @@ class Reader {
 
 	setAutoDisableNoteTool(autoDisable) {
 		this._updateState({ autoDisableNoteTool: autoDisable });
+	}
+
+	setInkColor(color) {
+		if (!/^#[0-9a-f]{6}$/i.test(color)) {
+			return;
+		}
+		this._tools.ink = { ...this._tools.ink, color };
+		if (this._state.tool.type === 'ink') {
+			this._updateState({ tool: this._tools.ink });
+		}
+	}
+
+	setInkSize(size) {
+		if (!Number.isFinite(size) || size <= 0) {
+			return;
+		}
+		this._tools.ink = { ...this._tools.ink, size };
+		if (this._state.tool.type === 'ink') {
+			this._updateState({ tool: this._tools.ink });
+		}
 	}
 
 	setInkSmoothing(smoothing) {
