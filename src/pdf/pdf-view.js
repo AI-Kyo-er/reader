@@ -1298,6 +1298,9 @@ class PDFView {
 			this._iframeWindow.document.getElementById('viewerContainer').style.touchAction = tool.type !== 'pointer' ? 'none' : 'auto';
 		}
 		this._iframeWindow.document.documentElement.toggleAttribute(
+			'data-ink-tool', tool.type === 'ink'
+		);
+		this._iframeWindow.document.documentElement.toggleAttribute(
 			'data-android-annotation-tool',
 			this._options.platform === 'android' && !['pointer', 'hand'].includes(tool.type)
 		);

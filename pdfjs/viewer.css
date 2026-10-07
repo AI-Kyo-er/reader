@@ -319,6 +319,12 @@ body.portal #viewerContainer::-webkit-scrollbar { /* WebKit */
 	touch-action: none;
 }
 
+/* Declare the drawing surface before contact so native pen panning cannot
+   consume ink movement. Keep the surrounding viewer available for scrolling. */
+:root[data-ink-tool] .page {
+	touch-action: none;
+}
+
 :root[data-native-text-selection] .textLayer {
 	overflow: clip;
 	user-select: text;
